@@ -10,6 +10,9 @@ import {
   Globe,
   Sparkles,
   Code2,
+  RefreshCw,
+  AlertCircle,
+  Zap,
 } from 'lucide-react';
 
 interface OpenGraphModalProps {
@@ -21,24 +24,34 @@ export const OpenGraphModal: React.FC<OpenGraphModalProps> = ({ isOpen, onClose 
   const [activeTab, setActiveTab] = useState<'kakao' | 'social' | 'twitter' | 'code'>('kakao');
   const [copiedCode, setCopiedCode] = useState(false);
   const [copiedUrl, setCopiedUrl] = useState(false);
+  const [copiedFreshUrl, setCopiedFreshUrl] = useState(false);
 
   if (!isOpen) return null;
 
-  const currentUrl = typeof window !== 'undefined' ? window.location.origin : 'https://your-domain.com';
-  const ogImageUrl = '/og-image.jpg';
-  const siteTitle = '가구 제안 앱';
-  const siteDesc = '스타일·브랜드·가격대를 바탕으로 가구를 추천받고 공간 배치와 개별 가격 및 합계를 확인하는 제안 앱';
+  // Use the canonical production shared URL or current origin
+  const defaultOrigin = 'https://ais-pre-wdcb2wnzxywn4i2plynduo-454676454695.asia-northeast1.run.app';
+  const currentUrl = typeof window !== 'undefined' && !window.location.origin.includes('localhost')
+    ? window.location.origin
+    : defaultOrigin;
+    
+  const ogImageUrl = `${currentUrl}/og-image.jpg`;
+  const siteTitle = '가구 제안 앱 - 맞춤 가구 및 공간 인테리어 견적';
+  const siteDesc = '스타일·브랜드·예산 맞춤 가구 추천과 공간 연출 배치 및 상세 견적서';
+
+  // Fresh URL with timestamp parameter to bypass KakaoTalk's aggressive caching
+  const freshShareUrl = `${currentUrl}?k=${Date.now().toString().slice(-6)}`;
 
   const metaTagsCode = `<!-- Open Graph / KakaoTalk / Facebook / Slack -->
 <meta property="og:type" content="website" />
-<meta property="og:site_name" content="${siteTitle}" />
+<meta property="og:site_name" content="가구 제안 앱" />
 <meta property="og:title" content="${siteTitle}" />
 <meta property="og:description" content="${siteDesc}" />
+<meta property="og:url" content="${currentUrl}" />
 <meta property="og:image" content="${currentUrl}/og-image.jpg" />
 <meta property="og:image:secure_url" content="${currentUrl}/og-image.jpg" />
 <meta property="og:image:type" content="image/jpeg" />
-<meta property="og:image:width" content="1200" />
-<meta property="og:image:height" content="675" />
+<meta property="og:image:width" content="1376" />
+<meta property="og:image:height" content="768" />
 <meta property="og:image:alt" content="가구 제안 앱 공간 맞춤 가구 큐레이션 및 인테리어 제안서" />
 <meta property="og:locale" content="ko_KR" />
 
@@ -62,9 +75,16 @@ export const OpenGraphModal: React.FC<OpenGraphModalProps> = ({ isOpen, onClose 
     });
   };
 
+  const handleCopyFreshUrl = () => {
+    navigator.clipboard.writeText(freshShareUrl).then(() => {
+      setCopiedFreshUrl(true);
+      setTimeout(() => setCopiedFreshUrl(false), 2500);
+    });
+  };
+
   const handleDownloadOgImage = () => {
     const a = document.createElement('a');
-    a.href = ogImageUrl;
+    a.href = '/og-image.jpg';
     a.download = 'og-image.jpg';
     document.body.appendChild(a);
     a.click();
@@ -87,12 +107,12 @@ export const OpenGraphModal: React.FC<OpenGraphModalProps> = ({ isOpen, onClose 
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h3 className="text-base font-bold text-white">배포용 오픈 그래프(Open Graph) 설정 완료</h3>
-                <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-semibold">
-                  1200 × 675 규격
+                <h3 className="text-base font-bold text-white">카카오톡 & 배포용 오픈 그래프(OG) 설정</h3>
+                <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-400/20 text-amber-300 border border-amber-400/30 font-semibold">
+                  카카오톡 공식 규격 적용
                 </span>
               </div>
-              <p className="text-xs text-slate-300">카카오톡, 페이스북, 슬랙, 트위터 배포 시 표시되는 링크 미리보기</p>
+              <p className="text-xs text-slate-300">카카오톡 채팅방에 링크 전송 시 큰 썸네일 그림이 함께 나타납니다.</p>
             </div>
           </div>
 
@@ -154,30 +174,38 @@ export const OpenGraphModal: React.FC<OpenGraphModalProps> = ({ isOpen, onClose 
             }`}
           >
             <Code2 className="w-3.5 h-3.5" />
-            <span>HTML 메타태그 복사</span>
+            <span>적용된 메타태그</span>
           </button>
         </div>
 
         {/* Content Area */}
-        <div className="p-5 sm:p-8 flex-1 overflow-y-auto bg-slate-50">
+        <div className="p-5 sm:p-7 flex-1 overflow-y-auto bg-slate-50 space-y-5">
           {/* 1. KakaoTalk Mock Preview */}
           {activeTab === 'kakao' && (
-            <div className="max-w-md mx-auto">
-              <div className="text-center mb-4">
-                <span className="text-xs font-semibold text-slate-500 bg-slate-200/60 px-3 py-1 rounded-full">
-                  카카오톡 메시지 전송 시 링크 카드 미리보기
-                </span>
+            <div className="space-y-4">
+              {/* Important KakaoTalk Tips Notification */}
+              <div className="bg-amber-50 border border-amber-200 rounded-xl p-3.5 text-xs text-amber-900 space-y-1">
+                <div className="font-bold flex items-center gap-1.5 text-amber-950">
+                  <AlertCircle className="w-4 h-4 text-amber-600 shrink-0" />
+                  <span>카카오톡 그림 노출 핵심 요건 완료</span>
+                </div>
+                <p className="text-amber-800 text-[11px] leading-relaxed">
+                  1. <strong>절대 HTTPS 경로</strong>: 카카오톡 스크랩 엔진은 상대경로(/og-image.jpg)를 지원하지 않으므로 <code className="bg-amber-100/70 px-1 rounded font-mono font-semibold">https://.../og-image.jpg</code> 절대경로로 완전 적용되었습니다.
+                </p>
+                <p className="text-amber-800 text-[11px] leading-relaxed">
+                  2. <strong>카카오톡 캐시 주의</strong>: 이미 카카오톡에 한 번 보낸 주소는 이전 결과(그림 없음)가 캐시되어 있을 수 있습니다. 아래 <strong>[캐시 우회 링크 복사]</strong>를 눌러 바로 카카오톡에 전송해 보세요!
+                </p>
               </div>
 
               {/* Chat bubble simulation */}
-              <div className="bg-[#B2C7D9] p-4 sm:p-6 rounded-2xl shadow-inner">
+              <div className="bg-[#B2C7D9] p-4 sm:p-6 rounded-2xl shadow-inner max-w-lg mx-auto">
                 <div className="max-w-[320px] ml-auto">
                   {/* Chat balloon */}
-                  <div className="bg-white rounded-2xl overflow-hidden shadow-md border border-black/5">
+                  <div className="bg-white rounded-2xl overflow-hidden shadow-md border border-black/5 transition-transform hover:scale-[1.01]">
                     {/* OG Image */}
-                    <div className="relative aspect-[1.91/1] overflow-hidden bg-slate-200">
+                    <div className="relative aspect-[1.79/1] overflow-hidden bg-slate-200">
                       <img
-                        src={ogImageUrl}
+                        src="/og-image.jpg"
                         alt="가구 제안 앱 오픈그래프"
                         className="w-full h-full object-cover"
                       />
@@ -190,13 +218,48 @@ export const OpenGraphModal: React.FC<OpenGraphModalProps> = ({ isOpen, onClose 
                       <p className="text-xs text-slate-600 mt-1 line-clamp-2 leading-relaxed">
                         {siteDesc}
                       </p>
-                      <div className="mt-2 text-[11px] text-slate-400 flex items-center gap-1">
-                        <Globe className="w-3 h-3" />
+                      <div className="mt-2 text-[11px] text-slate-400 flex items-center gap-1 font-medium">
+                        <Globe className="w-3 h-3 text-slate-400" />
                         <span className="truncate">{currentUrl.replace(/^https?:\/\//, '')}</span>
                       </div>
                     </div>
                   </div>
-                  <div className="text-right text-[10px] text-slate-600 mt-1 pr-1">오후 2:30</div>
+                  <div className="text-right text-[10px] text-slate-600 mt-1 pr-1 font-medium">오후 2:30</div>
+                </div>
+              </div>
+
+              {/* Kakao-specific Action Bar */}
+              <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-xs flex flex-col sm:flex-row items-center justify-between gap-3">
+                <div>
+                  <div className="text-xs font-bold text-slate-900 flex items-center gap-1.5">
+                    <Zap className="w-3.5 h-3.5 text-amber-500 fill-amber-500" />
+                    <span>카카오톡 즉시 테스트 (캐시 없는 신규 링크)</span>
+                  </div>
+                  <p className="text-[11px] text-slate-500 mt-0.5">
+                    카카오톡이 새 이미지를 바로 긁어오도록 타임스탬프 파라미터가 포함된 주소입니다.
+                  </p>
+                </div>
+
+                <div className="flex items-center gap-2 shrink-0">
+                  <button
+                    type="button"
+                    onClick={handleCopyFreshUrl}
+                    className="px-3.5 py-2 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 text-xs font-bold flex items-center gap-1.5 transition-all shadow-xs cursor-pointer"
+                  >
+                    {copiedFreshUrl ? <Check className="w-3.5 h-3.5 text-emerald-800" /> : <Copy className="w-3.5 h-3.5" />}
+                    <span>{copiedFreshUrl ? '카카오 테스트 링크 복사됨!' : '캐시 우회 링크 복사'}</span>
+                  </button>
+
+                  <a
+                    href={`https://developers.kakao.com/tool/clear/og?url=${encodeURIComponent(currentUrl)}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="px-3 py-2 rounded-xl border border-slate-300 hover:bg-slate-50 text-slate-700 text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer"
+                    title="카카오 공식 개발자 OG 캐시 초기화 도구"
+                  >
+                    <RefreshCw className="w-3.5 h-3.5 text-slate-500" />
+                    <span>카카오 OG 캐시 삭제 도구</span>
+                  </a>
                 </div>
               </div>
             </div>
@@ -212,9 +275,9 @@ export const OpenGraphModal: React.FC<OpenGraphModalProps> = ({ isOpen, onClose 
               </div>
 
               <div className="bg-white border border-slate-300 rounded-xl overflow-hidden shadow-md hover:shadow-lg transition-shadow">
-                <div className="aspect-[1.91/1] w-full overflow-hidden bg-slate-100">
+                <div className="aspect-[1.79/1] w-full overflow-hidden bg-slate-100">
                   <img
-                    src={ogImageUrl}
+                    src="/og-image.jpg"
                     alt="가구 제안 앱 오픈그래프"
                     className="w-full h-full object-cover"
                   />
@@ -240,9 +303,9 @@ export const OpenGraphModal: React.FC<OpenGraphModalProps> = ({ isOpen, onClose 
               </div>
 
               <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-md">
-                <div className="aspect-[1.91/1] w-full overflow-hidden bg-slate-100 relative">
+                <div className="aspect-[1.79/1] w-full overflow-hidden bg-slate-100 relative">
                   <img
-                    src={ogImageUrl}
+                    src="/og-image.jpg"
                     alt="가구 제안 앱 오픈그래프"
                     className="w-full h-full object-cover"
                   />
@@ -263,7 +326,7 @@ export const OpenGraphModal: React.FC<OpenGraphModalProps> = ({ isOpen, onClose 
             <div className="max-w-2xl mx-auto space-y-3">
               <div className="flex items-center justify-between">
                 <span className="text-xs font-bold text-slate-700">
-                  HTML &lt;head&gt; 적용 소스코드 (index.html에 자동 적용 완료)
+                  HTML &lt;head&gt; 메타태그 (index.html에 실제 반영 완료)
                 </span>
                 <button
                   type="button"
@@ -282,17 +345,17 @@ export const OpenGraphModal: React.FC<OpenGraphModalProps> = ({ isOpen, onClose 
           )}
 
           {/* Asset Info Card */}
-          <div className="mt-6 p-4 rounded-xl bg-white border border-slate-200 shadow-xs flex flex-col sm:flex-row items-center justify-between gap-3">
+          <div className="p-4 rounded-xl bg-white border border-slate-200 shadow-xs flex flex-col sm:flex-row items-center justify-between gap-3">
             <div className="flex items-center gap-3">
               <img
-                src={ogImageUrl}
+                src="/og-image.jpg"
                 alt="OG Thumbnail"
                 className="w-16 h-10 object-cover rounded-lg border border-slate-200 shrink-0"
               />
               <div>
                 <div className="text-xs font-bold text-slate-900">배포 에셋: public/og-image.jpg</div>
                 <div className="text-[11px] text-slate-500">
-                  해상도 1200 × 675 (16:9) · 고화질 가구 큐레이션 쇼케이스 디자인
+                  해상도 1376 × 768 (16:9 와이드) · 절대 경로 HTTPS 연결 완료
                 </div>
               </div>
             </div>
@@ -304,7 +367,7 @@ export const OpenGraphModal: React.FC<OpenGraphModalProps> = ({ isOpen, onClose 
                 className="px-3 py-1.5 rounded-lg border border-slate-300 text-slate-700 hover:bg-slate-100 text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer"
               >
                 <Download className="w-3.5 h-3.5" />
-                <span>이미지 파일 다운로드</span>
+                <span>이미지 다운로드</span>
               </button>
 
               <button
@@ -313,7 +376,7 @@ export const OpenGraphModal: React.FC<OpenGraphModalProps> = ({ isOpen, onClose 
                 className="px-3 py-1.5 rounded-lg bg-slate-900 text-white hover:bg-slate-800 text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer"
               >
                 {copiedUrl ? <Check className="w-3.5 h-3.5 text-amber-400" /> : <ExternalLink className="w-3.5 h-3.5" />}
-                <span>{copiedUrl ? '복사 완료' : '사이트 URL 복사'}</span>
+                <span>{copiedUrl ? '복사 완료' : '기본 URL 복사'}</span>
               </button>
             </div>
           </div>
@@ -321,7 +384,7 @@ export const OpenGraphModal: React.FC<OpenGraphModalProps> = ({ isOpen, onClose 
 
         {/* Modal Bottom Footer */}
         <div className="px-5 py-3 bg-slate-100 border-t border-slate-200 flex items-center justify-between text-xs text-slate-500 shrink-0">
-          <span>배포 후 카카오톡 공유, SNS 링크 전송 시 위와 같이 자동 썸네일 카드로 표시됩니다.</span>
+          <span>카카오톡 전송 시 위 시뮬레이션 카드와 동일하게 고해상도 가구 이미지가 함께 전송됩니다.</span>
           <button
             type="button"
             onClick={onClose}
@@ -334,3 +397,4 @@ export const OpenGraphModal: React.FC<OpenGraphModalProps> = ({ isOpen, onClose 
     </div>
   );
 };
+
