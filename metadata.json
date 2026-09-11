@@ -1,0 +1,6 @@
+{
+  "name": "가구 제안 앱",
+  "description": "스타일·브랜드·가격대를 바탕으로 가구를 추천받고 공간 배치와 개별 가격 및 합계를 확인하는 제안 앱",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

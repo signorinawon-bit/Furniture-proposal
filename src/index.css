@@ -1,0 +1,34 @@
+@import "tailwindcss";
+
+@media print {
+  @page {
+    size: A4 portrait;
+    margin: 12mm 10mm 12mm 10mm;
+  }
+
+  body {
+    background: #ffffff !important;
+    color: #0f172a !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  header, nav, .print\:hidden, [data-print-hide="true"] {
+    display: none !important;
+  }
+
+  .print\:block {
+    display: block !important;
+  }
+
+  /* Ensure room visual and furniture table print cleanly */
+  img {
+    max-width: 100% !important;
+    page-break-inside: avoid !important;
+  }
+
+  table, tr, td, th {
+    page-break-inside: avoid !important;
+  }
+}
+
