@@ -5,12 +5,14 @@ import { Header } from './components/Header';
 import { Step1InputForm } from './components/Step1InputForm';
 import { Step2ProductSelection } from './components/Step2ProductSelection';
 import { Step3ProposalResult } from './components/Step3ProposalResult';
+import { OpenGraphModal } from './components/OpenGraphModal';
 
 export default function App() {
   const [currentStep, setCurrentStep] = useState<1 | 2 | 3>(1);
   const [style, setStyle] = useState<StyleType>('modern');
   const [brand, setBrand] = useState<BrandType>('all');
   const [priceRange, setPriceRange] = useState<PriceRangeType>('all');
+  const [isOgModalOpen, setIsOgModalOpen] = useState(false);
 
   const [selectedItemIds, setSelectedItemIds] = useState<Set<string>>(new Set());
   const [itemQuantities, setItemQuantities] = useState<Record<string, number>>({});
@@ -136,6 +138,7 @@ export default function App() {
           if (s === 3 && selectedItemIds.size > 0) setCurrentStep(3);
         }}
         selectedCount={selectedItemIds.size}
+        onOpenOgModal={() => setIsOgModalOpen(true)}
       />
 
       {/* Main Content Areas */}
@@ -191,15 +194,29 @@ export default function App() {
       <footer className="bg-white border-t border-slate-200 py-6 px-4 text-center text-xs text-slate-500 print:hidden mt-auto">
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3">
           <p>© 2026 가구 제안 솔루션 · 가구 제안 업무 지원 시스템</p>
-          <div className="flex items-center gap-4 text-slate-400">
+          <div className="flex flex-wrap items-center justify-center gap-3 text-slate-400">
             <span>스타일·브랜드·가격대 3단 필터</span>
             <span>·</span>
             <span>공간 배치 연동</span>
             <span>·</span>
             <span>실시간 견적 합계</span>
+            <span>·</span>
+            <button
+              type="button"
+              onClick={() => setIsOgModalOpen(true)}
+              className="text-slate-600 hover:text-slate-900 font-semibold underline underline-offset-2 cursor-pointer transition-colors"
+            >
+              배포 오픈 그래프(OG) 미리보기
+            </button>
           </div>
         </div>
       </footer>
+
+      {/* Open Graph & SNS Share Modal */}
+      <OpenGraphModal
+        isOpen={isOgModalOpen}
+        onClose={() => setIsOgModalOpen(false)}
+      />
     </div>
   );
 }
